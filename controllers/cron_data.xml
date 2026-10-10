@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Odoo 19: cron must reference a separate ir.actions.server record -->
+    <record id="ir_actions_server_google_sheet_sync" model="ir.actions.server">
+        <field name="name">Google Sheet Connector: Auto Sync</field>
+        <field name="model_id" ref="model_google_sheet_connection"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_all()</field>
+    </record>
+
+    <record id="ir_cron_google_sheet_sync" model="ir.cron">
+        <field name="name">Google Sheet Connector: Auto Sync</field>
+        <field name="active">True</field>
+        <field name="ir_actions_server_id" ref="ir_actions_server_google_sheet_sync"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="priority">5</field>
+    </record>
+
+</odoo>

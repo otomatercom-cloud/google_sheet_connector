@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_google_sheet_oauth_settings_form" model="ir.ui.view">
+        <field name="name">google.sheet.oauth.settings.form</field>
+        <field name="model">google.sheet.oauth.settings</field>
+        <field name="arch" type="xml">
+            <form string="Google OAuth2 Settings">
+                <sheet>
+                    <div class="alert alert-info" role="alert">
+                        <strong>🔑 How to get OAuth Credentials</strong>
+                        <ol>
+                            <li>Go to <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a></li>
+                            <li>Create a project → Enable <b>Google Sheets API</b> and <b>Google Drive API</b></li>
+                            <li>Go to <b>APIs &amp; Services → Credentials → Create Credentials → OAuth 2.0 Client ID</b></li>
+                            <li>Application type: <b>Web application</b></li>
+                            <li>Add Authorized Redirect URI: <b>[Your Odoo URL]/google_sheet_connector/oauth/callback</b></li>
+                            <li>Copy Client ID and Client Secret below</li>
+                        </ol>
+                    </div>
+
+                    <group string="OAuth2 App Credentials">
+                        <field name="client_id" placeholder="123456789-xxx.apps.googleusercontent.com"/>
+                        <field name="client_secret" password="True" placeholder="GOCSPX-..."/>
+                        <field name="base_url" placeholder="https://myodoo.com"/>
+                    </group>
+
+                    <group string="Redirect URI — add this to Google Cloud Console">
+                        <div class="alert alert-secondary" role="alert">
+                            <field name="base_url" readonly="1" nolabel="1"/>/google_sheet_connector/oauth/callback
+                        </div>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_google_sheet_oauth_settings" model="ir.actions.act_window">
+        <field name="name">OAuth Settings</field>
+        <field name="res_model">google.sheet.oauth.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_google_sheet_sync_wizard_form" model="ir.ui.view">
+        <field name="name">google.sheet.sync.wizard.form</field>
+        <field name="model">google.sheet.sync.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Sync Google Sheet">
+                <sheet>
+                    <group invisible="state == 'done'">
+                        <field name="connection_id" options="{'no_create': True}"/>
+                        <field name="reset_last_row"/>
+                        <field name="state" invisible="1"/>
+                    </group>
+
+                    <div class="alert alert-success" invisible="state != 'done'">
+                        <h4>✅ Sync Complete</h4>
+                        <field name="result_message" widget="text" readonly="1" nolabel="1"/>
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_sync" string="Start Import" type="object"
+                            class="btn-primary" invisible="state == 'done'"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_google_sheet_sync_wizard" model="ir.actions.act_window">
+        <field name="name">Sync Google Sheet</field>
+        <field name="res_model">google.sheet.sync.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

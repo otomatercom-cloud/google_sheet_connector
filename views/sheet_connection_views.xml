@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List View (Odoo 19: <list> replaces <tree>) -->
+    <record id="view_google_sheet_connection_list" model="ir.ui.view">
+        <field name="name">google.sheet.connection.list</field>
+        <field name="model">google.sheet.connection</field>
+        <field name="arch" type="xml">
+            <list string="Google Sheet Connections"
+                  decoration-success="state == 'confirmed'"
+                  decoration-danger="state == 'error'"
+                  decoration-muted="not active">
+                <field name="name"/>
+                <field name="worksheet_name"/>
+                <field name="target_model_id"/>
+                <field name="auth_method"/>
+                <field name="mapping_count" string="Mappings"/>
+                <field name="auto_sync"/>
+                <field name="last_sync_date"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'confirmed'"
+                       decoration-warning="state == 'draft'"
+                       decoration-danger="state == 'error'"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_google_sheet_connection_form" model="ir.ui.view">
+        <field name="name">google.sheet.connection.form</field>
+        <field name="model">google.sheet.connection</field>
+        <field name="arch" type="xml">
+            <form string="Google Sheet Connection">
+                <header>
+                    <button name="action_confirm" string="Test &amp; Confirm" type="object"
+                            class="btn-primary" invisible="state == 'confirmed'"/>
+                    <button name="action_sync_now" string="&#9654; Sync Now" type="object"
+                            class="btn-success" invisible="state != 'confirmed'"/>
+                    <button name="action_reset_draft" string="Reset to Draft" type="object"
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_logs" type="object" class="oe_stat_button" icon="fa-list">
+                            <field name="log_count" widget="statinfo" string="Logs"/>
+                        </button>
+                        <button name="action_open_mappings" type="object"
+                                class="oe_stat_button" icon="fa-columns">
+                            <field name="mapping_count" widget="statinfo" string="Mappings"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. Marketing Leads Import"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Google Sheet">
+                            <field name="sheet_url" placeholder="https://docs.google.com/spreadsheets/d/..."/>
+                            <field name="sheet_id" readonly="1"/>
+                            <field name="worksheet_name" placeholder="Sheet1"/>
+                            <field name="header_row"/>
+                            <field name="data_start_row"/>
+                        </group>
+                        <group string="Target Odoo Model">
+                            <field name="target_model_id" options="{'no_create': True}" required="1"/>
+                            <field name="target_model_name" invisible="1"/>
+                            <field name="duplicate_check_field_id" domain="[('model_id', '=', target_model_id)]"/>
+                            <field name="on_duplicate" invisible="not duplicate_check_field_id"/>
+                        </group>
+                    </group>
+
+                    <group string="Authentication">
+                        <field name="auth_method" widget="radio"/>
+
+                        <div invisible="auth_method != 'oauth'" class="o_field_widget">
+                            <div invisible="oauth_google_email" class="alert alert-warning mb-2" role="alert">
+                                Not connected. Click Login with Google to authorize.
+                            </div>
+                            <div invisible="not oauth_google_email" class="alert alert-success mb-2" role="alert">
+                                Connected as: <field name="oauth_google_email" readonly="1" nolabel="1"/>
+                                <field name="oauth_token_expiry" readonly="1" nolabel="1" widget="datetime"/>
+                            </div>
+                            <button name="action_oauth_login" type="object"
+                                    string="Login with Google"
+                                    class="btn btn-primary mb-2"/>
+                            <button name="action_oauth_disconnect" type="object"
+                                    string="Disconnect Google Account"
+                                    class="btn btn-danger btn-sm"
+                                    invisible="not oauth_google_email"
+                                    confirm="This will clear the OAuth tokens. You will need to re-authorize."/>
+                        </div>
+                        <field name="oauth_google_email" invisible="1"/>
+                        <field name="oauth_token_expiry" invisible="1"/>
+                        <field name="oauth_authorize_url" invisible="1"/>
+
+                        <field name="google_api_key" password="True"
+                               invisible="auth_method != 'api_key'"
+                               groups="base.group_system"/>
+
+                        <field name="service_account_json" widget="text"
+                               invisible="auth_method != 'service_account'"
+                               groups="base.group_system"/>
+                    </group>
+
+                    <group string="Scheduled Sync">
+                        <field name="auto_sync"/>
+                        <field name="sync_interval_minutes" invisible="not auto_sync"
+                               string="Sync Every (Minutes)"
+                               help="Set to 0 to use hours instead. E.g. 30 = every 30 min."/>
+                        <field name="sync_interval_hours" invisible="not auto_sync or sync_interval_minutes > 0"
+                               string="Sync Every (Hours)"
+                               help="E.g. 2 = every 2 hours. Only used when minutes is 0."/>
+                        <field name="last_sync_date" readonly="1"/>
+                        <field name="last_sync_row" readonly="1"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Field Mappings" name="mappings">
+                            <div class="mb-2">
+                                <button name="action_auto_load_headers" type="object"
+                                        string="Auto-Load Columns from Sheet"
+                                        class="btn btn-secondary btn-sm"
+                                        confirm="This will remove existing mappings and reload columns from the sheet. Continue?"/>
+                            </div>
+                            <field name="field_mapping_ids" context="{'default_connection_id': id}">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="sheet_column_letter" string="Column"/>
+                                    <field name="sheet_column_header" string="Sheet Header"/>
+                                    <field name="odoo_field_id"
+                                           domain="[('model_id', '=', parent.target_model_id), ('ttype', 'not in', ['one2many', 'many2many'])]"
+                                           options="{'no_create': True}"/>
+                                    <field name="odoo_field_type" readonly="1" optional="show"/>
+                                    <field name="value_transform" optional="show"/>
+                                    <field name="relation_search_field" optional="hide"/>
+                                    <field name="m2o_create_if_missing" optional="hide" string="Create if Missing"/>
+                                    <field name="default_value" optional="hide"/>
+                                    <field name="notes" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Add any notes about this connection..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View (Odoo 19: no <group> inside <search>, use <separator/> instead) -->
+    <record id="view_google_sheet_connection_search" model="ir.ui.view">
+        <field name="name">google.sheet.connection.search</field>
+        <field name="model">google.sheet.connection</field>
+        <field name="arch" type="xml">
+            <search string="Google Sheet Connections">
+                <field name="name"/>
+                <field name="target_model_id"/>
+                <filter name="confirmed" string="Confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter name="auto_sync" string="Auto Sync" domain="[('auto_sync', '=', True)]"/>
+                <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter name="group_model" string="Target Model" context="{'group_by': 'target_model_id'}"/>
+                <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_google_sheet_connection" model="ir.actions.act_window">
+        <field name="name">Google Sheet Connections</field>
+        <field name="res_model">google.sheet.connection</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_confirmed': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add your first Google Sheet Connection!
+            </p>
+            <p>
+                Connect Google Sheets to any Odoo model (CRM Leads, Contacts, etc.)
+                and configure field mappings for automatic import.
+            </p>
+        </field>
+    </record>
+
+</odoo>

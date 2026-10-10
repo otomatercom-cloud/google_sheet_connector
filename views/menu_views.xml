@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_google_sheet_root"
+              name="Google Sheet Connector"
+              sequence="90"
+              web_icon="google_sheet_connector,static/description/icon.png"
+              groups="base.group_user"/>
+
+    <menuitem id="menu_google_sheet_connections"
+              name="Connections"
+              parent="menu_google_sheet_root"
+              action="action_google_sheet_connection"
+              sequence="10"/>
+
+    <menuitem id="menu_google_sheet_logs"
+              name="Sync Logs"
+              parent="menu_google_sheet_root"
+              action="action_google_sheet_sync_log"
+              sequence="20"/>
+
+    <menuitem id="menu_google_sheet_oauth_settings"
+              name="OAuth Settings"
+              parent="menu_google_sheet_root"
+              action="action_google_sheet_oauth_settings"
+              sequence="30"
+              groups="base.group_system"/>
+
+</odoo>

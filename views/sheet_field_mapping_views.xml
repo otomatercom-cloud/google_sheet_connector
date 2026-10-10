@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Odoo 19: <list> replaces <tree> -->
+    <record id="view_google_sheet_field_mapping_list" model="ir.ui.view">
+        <field name="name">google.sheet.field.mapping.list</field>
+        <field name="model">google.sheet.field.mapping</field>
+        <field name="arch" type="xml">
+            <list string="Field Mappings">
+                <field name="connection_id"/>
+                <field name="sheet_column_letter"/>
+                <field name="sheet_column_header"/>
+                <field name="odoo_field_id"/>
+                <field name="odoo_field_type"/>
+                <field name="value_transform"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_google_sheet_field_mapping" model="ir.actions.act_window">
+        <field name="name">Field Mappings</field>
+        <field name="res_model">google.sheet.field.mapping</field>
+        <field name="view_mode">list</field>
+        <field name="domain">[('connection_id', '=', active_id)]</field>
+    </record>
+
+</odoo>

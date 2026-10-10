@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_google_sheet_connection_manager,Google Sheet Connection Manager,model_google_sheet_connection,base.group_system,1,1,1,1
+access_google_sheet_connection_user,Google Sheet Connection User,model_google_sheet_connection,base.group_user,1,0,0,0
+access_google_sheet_field_mapping_manager,Google Sheet Field Mapping Manager,model_google_sheet_field_mapping,base.group_system,1,1,1,1
+access_google_sheet_field_mapping_user,Google Sheet Field Mapping User,model_google_sheet_field_mapping,base.group_user,1,0,0,0
+access_google_sheet_sync_log_manager,Google Sheet Sync Log Manager,model_google_sheet_sync_log,base.group_system,1,1,1,1
+access_google_sheet_sync_log_user,Google Sheet Sync Log User,model_google_sheet_sync_log,base.group_user,1,0,0,0
+access_google_sheet_sync_wizard,Google Sheet Sync Wizard,model_google_sheet_sync_wizard,base.group_user,1,1,1,1
+access_google_sheet_oauth_settings_manager,Google OAuth Settings Manager,model_google_sheet_oauth_settings,base.group_system,1,1,1,1
+access_google_sheet_oauth_settings_user,Google OAuth Settings User,model_google_sheet_oauth_settings,base.group_user,1,0,0,0
